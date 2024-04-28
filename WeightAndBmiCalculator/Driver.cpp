@@ -25,6 +25,7 @@ struct BaseRecord
 User createBaseUser();
 void showCategory(double);
 int getMenu();
+
 User::Record readLastRecord();
 void printAllRecords(string);
 
