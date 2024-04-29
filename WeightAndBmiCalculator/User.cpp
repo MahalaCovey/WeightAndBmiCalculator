@@ -16,7 +16,6 @@ using namespace std;
 //***********************
 User::User()
 {
-	//s	strcpy(name, '\0');
 	height = 0;
 }
 
@@ -27,7 +26,8 @@ User::User(double h)
 {
 	/*height = h / 100;*/
 	height = h;
-	setIsMetric(true);
+	/*setIsMetric(true);*/
+	isMetric = true;
 }
 
 //****************************************************************************
@@ -36,7 +36,8 @@ User::User(double h)
 User::User(double f, double i)
 {
 	height = (f * 12) + i;
-	setIsMetric(false);
+	/*setIsMetric(false);*/
+	isMetric = false;
 }
 
 
@@ -49,7 +50,8 @@ void User::setHeight(double h)
 {
 	/*height = h / 100; */
 	height = h;
-	setIsMetric(true);
+	/*setIsMetric(true);*/
+	isMetric = true;
 
 }
 
@@ -61,7 +63,8 @@ void User::setHeight(double h)
 void User::setHeight(double f, double i)
 {
 	height = (f * 12) + i;
-	setIsMetric(false);
+	/*setIsMetric(false);*/
+	isMetric = false;
 }
 
 //*************************************************************************
@@ -89,18 +92,20 @@ bool User::getIsMetric() const
 	return isMetric;
 }
 
-void User::addRecord(fstream& file)
+void User::addRecord(string filName)
 {
+	// Overridden in the derived calsses, MetricData and ImperialData
 }
 
 double User::getBmi() const
 {
+	// Overridden in the derived calsses, MetricData and ImperialData
 	return 0;
 }
 
 double User::promptUserForWeight(bool isMetric) {
 	double inputWeight;
-	string units = isMetric ? "kilograms:" : "pounds:";
+	string units = isMetric ? "kilograms: " : "pounds: ";
 	cout << "Enter your weight in " << units;
 	cin >> inputWeight;
 

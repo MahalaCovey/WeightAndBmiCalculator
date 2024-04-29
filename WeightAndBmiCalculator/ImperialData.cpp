@@ -59,23 +59,22 @@ double ImperialData::getBmi() const
 	return weight / (pow(getHeight(), 2)) * 703;
 }
 
-void ImperialData::addRecord(fstream& file) {
+void ImperialData::addRecord(string fileName) {
 	{
 		setWeight(promptUserForWeight(false));
 		Record rec = { getHeight(), getIsMetric(), getWeight(), getBmi() };
 
-		int ht = getHeight();
-		double feet = ht / 12;
-		int inches = ht % 12;
+		//int ht = getHeight();
+		//double feet = ht / 12;
+		//int inches = ht % 12;
 
-		cout << "impericalRecord" << endl; // display to check vals
-		cout << "ht= " << feet << " feet and " << inches << " inches" << endl;
-		cout << "is= " << getIsMetric() << endl;
-		cout << "wt= " << getWeight() << endl;
-		cout << "bmi= " << getBmi() << endl;
+		//cout << "impericalRecord" << endl; // display to check vals
+		//cout << "ht= " << feet << " feet and " << inches << " inches" << endl;
+		//cout << "is= " << getIsMetric() << endl;
+		//cout << "wt= " << getWeight() << endl;
+		//cout << "bmi= " << getBmi() << endl;
 
-		ofstream file("BmiData.dat", ios::binary | ios::app);
-
+		ofstream file(fileName, ios::binary | ios::app);
 		file.write(reinterpret_cast<char*>(&rec), sizeof(rec));
 		file.close();
 

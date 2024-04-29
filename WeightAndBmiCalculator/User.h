@@ -12,10 +12,10 @@ using namespace std;
 class User
 {
 private:
-	char name[30];
+	/*char name[30];*/
 	double height; // Height in centimeters or feet and inches 
 	bool isMetric; // Measurment preference in metric units or imperial units
-	char type[1];
+	/*char type[1];*/
 
 public:
 	User(); // Default constructor
@@ -26,7 +26,7 @@ public:
 	void setIsMetric(bool);
 	double getHeight() const;
 	bool getIsMetric() const;
-	virtual void addRecord(fstream& file);
+	virtual void addRecord(string);
 	virtual double getBmi() const;
 	double promptUserForWeight(bool isMetric);
 	struct Record

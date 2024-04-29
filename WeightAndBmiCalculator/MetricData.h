@@ -21,7 +21,7 @@ public:
 	void setWeight(double);
 	double getWeight() const;
 	double getBmi() const;
-	void addRecord(fstream& file);
+	void addRecord(string);
 
 };
 #endif

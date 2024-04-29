@@ -59,26 +59,18 @@ double MetricData::getBmi() const
 {
 	return weight / (pow((getHeight() / 100), 2));
 }
-void MetricData::addRecord(fstream& file) {
-	{
-		setWeight(promptUserForWeight(true));
-		Record rec = { getHeight(), getIsMetric(), getWeight(), getBmi() };
+void MetricData::addRecord(string fileName) 
+{
+	setWeight(promptUserForWeight(true));
+	Record rec = { getHeight(), getIsMetric(), getWeight(), getBmi() };
 
-		cout << "metricRecord" << endl; // display to check vals
-		cout << "ht= " << getHeight() << endl;
-		cout << "is= " << getIsMetric() << endl;
-		cout << "ht= " << getHeight() << endl;
-		cout << "bmi= " << getBmi() << endl;
+	//cout << "metricRecord" << endl; // display to check vals
+	//cout << "ht= " << getHeight() << endl;
+	//cout << "is= " << getIsMetric() << endl;
+	//cout << "ht= " << getHeight() << endl;
+	//cout << "bmi= " << getBmi() << endl;
 
-		//		file.open("BmiData.dat", ios::out | ios::binary | ios::app);
-		ofstream file("BmiData.dat", ios::binary | ios::app);
-
-
-
-		file.write(reinterpret_cast<char*>(&rec), sizeof(rec));
-		file.close();
-		//		updateFileRecord(file, true, getWeight());
-
-	}
-
+	ofstream file(fileName, ios::binary | ios::app);
+	file.write(reinterpret_cast<char*>(&rec), sizeof(rec));
+	file.close();
 }

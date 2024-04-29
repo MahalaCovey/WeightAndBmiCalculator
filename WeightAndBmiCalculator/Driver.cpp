@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <fstream>
 #include <filesystem>
+#include <cmath>
+
 
 using namespace std;
 
@@ -24,31 +26,36 @@ struct BaseRecord
 // Function prototypes
 User createBaseUser();
 void showCategory(double);
+User* getDerived(User);
 int getMenu();
-
-User::Record readLastRecord();
+User::Record readLastRecord(string);
 void printAllRecords(string);
+void reset(string);
+bool fileExists(string);
+void viewTable(string, User);
+
 
 int main()
 {
 	int menuChoice; // User's menu choice
 	User person;    // User's base info
-	fstream file;
-	string fileName = "BmiData.dat";
+	/*fstream file;*/
+	string const fileName = "BmiData.dat";
 
+	if (fileExists(fileName))
+	{
+		cout << "\nWelcome back. Your last recorded measurements were:" << endl;
+		User::Record record = readLastRecord(fileName);
+		person.setHeight(record.height);
+		person.setIsMetric(record.isMetric);
 
-	filesystem::path filePath{ fileName };
-
-	if (!filesystem::exists(filePath)) {
+		// Need to retain height and ismetric val!!! just use readFirstREc! method! Need to create
+	}
+	else 
+	{
 		cout << "\nFile doesn't exist." << endl;
 		cout << "Creating file..." << endl;
 		person = createBaseUser();
-	}
-	else {
-		cout << "\nWelcome back.  Your last recorded measurements were:" << endl;
-		User::Record record = readLastRecord();
-		person.setHeight(record.height);
-		person.setIsMetric(record.isMetric);
 	}
 
 	// Handle menu input
@@ -60,53 +67,62 @@ int main()
 		{
 		case 1: // Enter new record
 		{
-			User* user = nullptr;
+			User* userPtr = nullptr;
 
 			if (person.getIsMetric() == true)
 			{
-				user = new MetricData(person.getHeight(), 0);
+				userPtr = new MetricData(person.getHeight(), 0);
 			}
 			else
 			{
-				int ht = person.getHeight();
-				double feet = ht / 12;
+				/*int ht = person.getHeight();
+				double feet =  ht/ 12;
 				int inches = ht % 12;
-				user = new ImperialData(feet, inches, 0);
+				user = new ImperialData(feet, inches, 0);*/
+				userPtr = new ImperialData(0, person.getHeight(), 0);
 			}
 
-			if (user == nullptr) {
-				cerr << "Error: Memory allocation failed." << endl;
-				break; // Exit the case if memory allocation failed
-			}
+			//if (userPtr == nullptr) {
+			//	cerr << "Error: Memory allocation failed." << endl;
+			//	break; // Exit the case if memory allocation failed
+			//}
 
-			file.open(fileName, ios::out | ios::app | ios::binary);
-			if (!file.is_open()) {
-				cerr << "Error: Failed to open the file for writing." << endl;
-				delete user;
-				break;
-			}
+			//file.open(fileName, ios::out | ios::app | ios::binary);
+			//if (!file.is_open()) {
+			//	cerr << "Error: Failed to open the file for writing." << endl;
+			//	delete userPtr;
+			//	break;
+			//}
 
-			user->addRecord(file);
-			cout << "metric bmi = " << user->getBmi() << endl;
-			showCategory(user->getBmi());
+			userPtr->addRecord(fileName);
+			/*cout << "metric bmi = " << userPtr->getBmi() << endl;
+			showCategory(userPtr->getBmi());*/
 
-			delete user; // Clean up dynamically allocated memory
-			file.close();
+			//delete userPtr; // Clean up dynamically allocated memory
+			//file.close();
 			break;
 		}
-		case 2: // Display records from file
-			printAllRecords(fileName);
+		case 2: // Before a
+			/*cout << "Last Record:" << endl;
+			readLastRecord(fileName);*/
 			break;
-		case 3:
-			cout << "Last Record:" << endl;
-			readLastRecord();
+			
+		case 3: 
+			/*printAllRecords(fileName);*/
+			viewTable(fileName, person);
 			break;
-		case 4: // Exit
+			
+		case 4: // Reset
+			reset(fileName);
+			break;
+
+		case 5: // Exit
 			// Close the file before exiting
-			file.close();
+			//cout << "Is the file open? " << boolalpha << file.is_open(); // was no
+			//file.close();
 			break;
 		}
-	} while (menuChoice != 4);
+	} while (menuChoice != 5);
 
 	return 0;
 }
@@ -169,54 +185,52 @@ User createBaseUser()
 
 void showCategory(double bmi)
 {
-	cout << "At " << bmi << ", your current BMI category is ";
-
 	if (bmi < 18.5)
 	{
-		cout << "underweight.";
+		cout << "Underweight";
 	}
 	else if (bmi >= 18.5 && bmi < 24.9)
 	{
-		cout << "normal weight.";
+		cout << "Normal Weight";
 	}
 	else if (bmi >= 24.9 && bmi < 30)
 	{
-		cout << "overweight.";
+		cout << "Overweight";
 	}
 	else
 	{
-		cout << "obese.";
+		cout << "Obese";
 	}
 }
 
-void printAllRecords(string f) {
-	// Open the file in binary mode
-	ifstream file(f, ios::binary);
-	if (!file.is_open()) {
-		cerr << "Error: Failed to open the file for reading." << endl;
-		return;
-	}
-
-	// Read and print each record in the file
-	User::Record record;
-	cout << "Height" << endl;
-	while (file.read(reinterpret_cast<char*>(&record), sizeof(User::Record))) {
-		//		cout << "Name: " << record.name << endl;
-		cout << "Height: " << record.height << endl;
-		cout << "Is metric: " << (record.isMetric ? "Yes" : "No") << endl;
-		cout << "Weight: " << record.weight << endl;
-		cout << "BMI: " << record.bmi << endl;
-		cout << endl;
-	}
-
-	// Close the file
-	file.close();
-}
-
-User::Record readLastRecord() {
+//void printAllRecords(string f) {
+//	// Open the file in binary mode
+//	ifstream file(f, ios::binary);
+//	if (!file.is_open()) {
+//		cerr << "Error: Failed to open the file for reading." << endl;
+//		return;
+//	}
+//
+//	// Read and print each record in the file
+//	User::Record record;
+//	cout << "Height" << endl;
+//	while (file.read(reinterpret_cast<char*>(&record), sizeof(User::Record))) {
+////		cout << "Name: " << record.name << endl;
+//		cout << "Height: " << record.height << endl;
+//		cout << "Is metric: " << (record.isMetric ? "Yes" : "No") << endl;
+//		cout << "Weight: " << record.weight << endl;
+//		cout << "BMI: " << record.bmi << endl;
+//		cout << endl;
+//	}
+//
+//	// Close the file
+//	file.close();
+//}
+//
+User::Record readLastRecord(string fileName) {
 	User::Record lastRecord = {};
 	// Open the file in binary mode
-	ifstream file("BmiData.dat", ios::binary);
+	ifstream file(fileName, ios::binary);
 	if (!file.is_open()) {
 		cerr << "Error: Failed to open the file for reading." << endl;
 		return lastRecord;
@@ -254,15 +268,19 @@ User::Record readLastRecord() {
 		cout << "Height: " << lastRecord.height << " centimeters" << endl;
 	}
 	else {
-		int ht = lastRecord.height;
-		double feet = ht / 12;
-		int inches = ht % 12;
+		double ht = lastRecord.height;
+		double feet = floor(ht / 12);
+		double inches = fmod(ht, 12);
 		cout << "Height: " << feet << " feet and " << inches << " inches" << endl;
 
 	}
 	cout << "Is metric: " << (lastRecord.isMetric ? "Yes" : "No") << endl;
 	cout << "Weight: " << lastRecord.weight << endl;
-	cout << "BMI: " << lastRecord.bmi << endl;
+	cout << "BMI: ";
+	printf("%.1f", lastRecord.bmi); // Print to one decimal point
+	cout << endl;
+	
+
 	return lastRecord;
 }
 
@@ -271,21 +289,133 @@ int getMenu()
 	int choice; // Holds user's menu choice
 
 	// Display the menu
-	cout << "1. Enter new record" << endl
-		<< "2. Display records from file" << endl
-		<< "3. Display last record from file" << endl
-		<< "4. Exit" << endl;
+	cout << "1. Enter New Weight" << endl
+		<< "2. View Before And After Progress" << endl
+		<< "3. View Data Table" << endl
+		<< "4. Reset Data" << endl
+		<< "5. Exit" << endl;
 
 	// Get menu choice
 	cin >> choice;
 
 	// Validate user's menu choice
-	while (choice < 1 || choice > 4)
+	while (choice < 1 || choice > 5)
 	{
-		cout << "ERROR: Please enter a number 1-4: ";
+		cout << "ERROR: Please enter a number 1-5: ";
 		cin >> choice;
 	}
 
 	return choice;
 }
 
+void reset(string fileName)
+{
+	char check;
+	filesystem::path filePath{ fileName };
+
+	cout << "Are you sure you want to reset? This will permanently delete all your data. (y/n): ";
+	cin >> check;
+
+	// Validate input for check
+	while (tolower(check) != 'y' && tolower(check) != 'n')
+	{
+		cout << "ERROR: Please enter 'y' to reset or 'n' to keep your data: ";
+		cin >> check;
+	}
+
+	if (tolower(check) == 'y') // Reset
+	{
+		if (filesystem::remove(fileName))
+		{
+			cout << "Your data was successfully deleted. After the program exits, enter brand new data by running it again!\n";
+			exit(0);
+		}
+		else
+		{
+			cout << "There was an error deleting your data\n";
+		}
+	}
+	else // Don't reset
+	{
+		cout << "Keeping your data for now...\n";
+	}
+
+}
+
+bool fileExists(string fileName)
+{
+	filesystem::path filePath{ fileName };
+
+	if (filesystem::exists(filePath))
+		return true;
+	else
+		return false;
+}
+
+void viewTable(string fileName, User user)
+{
+	ifstream file;
+
+	if (fileExists(fileName))
+	{
+		string heightType = user.getIsMetric() ? " cm" : " in";
+		string weightType = user.getIsMetric() ? "(kg)" : "(lb)";
+
+		file.open(fileName, ios::in | ios::binary);
+
+		file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
+
+		cout << setw(30) << "Base Data\n";
+		cout << "Height: " << user.getHeight() << heightType << endl << endl;
+
+		cout << setw(32) << "Weight Data\n";
+		cout << " Weight " << weightType << "\t\t" << "BMI\t\t" << "Category\n";
+
+		while (!file.eof())
+		{
+			cout << setw(5) << user.record.weight << setw(20) << " ";
+			printf("%.1f", user.record.bmi); // Print to one decimal point
+			cout << setw(12) << " ";
+			showCategory(user.record.bmi);
+			cout << endl;
+
+			file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
+		}
+
+		cout << endl;
+
+
+		// test
+		cout << "First Record\n";
+		file.clear();
+		file.seekg(0L, ios::beg); // Seek first record
+		file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
+		cout << setw(5) << user.record.weight << setw(20) << " ";
+		printf("%.1f", user.record.bmi); // Print to one decimal point
+		cout << setw(12) << " ";
+		showCategory(user.record.bmi);
+		cout << endl;
+
+		
+		cout << "Last Record\n";
+		file.clear();
+		while (!file.eof())
+		{
+			file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
+		}
+
+		cout << setw(5) << user.record.weight << setw(20) << " ";
+		printf("%.1f", user.record.bmi); // Print to one decimal point
+		cout << setw(12) << " ";
+		showCategory(user.record.bmi);
+		cout << endl;
+
+
+		file.close();
+	}
+	else
+	{
+		cout << "You need to enter your weight to populate the table.\n";
+	}
+
+}
