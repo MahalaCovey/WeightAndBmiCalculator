@@ -26,35 +26,36 @@ struct BaseRecord
 // Function prototypes
 User createBaseUser();
 void showCategory(double);
-User* getDerived(User);
+
 int getMenu();
-User::Record readLastRecord(string);
-void printAllRecords(string);
+//User::Record readLastRecord(string);
+//void printAllRecords(string);
 void reset(string);
 bool fileExists(string);
 void viewTable(string, User);
+void viewProgess(string);
+User::Record getLastRecord(string);
+User::Record getFirstRecord(string);
+
 
 
 int main()
 {
 	int menuChoice; // User's menu choice
 	User person;    // User's base info
-	/*fstream file;*/
 	string const fileName = "BmiData.dat";
 
 	if (fileExists(fileName))
 	{
-		cout << "\nWelcome back. Your last recorded measurements were:" << endl;
-		User::Record record = readLastRecord(fileName);
-		person.setHeight(record.height);
-		person.setIsMetric(record.isMetric);
-
-		// Need to retain height and ismetric val!!! just use readFirstREc! method! Need to create
+		cout << "Welcome back!\n";
+		User::Record base = getLastRecord(fileName);
+		person.setHeight(base.height);
+		person.setIsMetric(base.isMetric);
 	}
 	else 
 	{
-		cout << "\nFile doesn't exist." << endl;
-		cout << "Creating file..." << endl;
+		/*cout << "\nFile doesn't exist." << endl;
+		cout << "Creating file..." << endl;*/
 		person = createBaseUser();
 	}
 
@@ -102,27 +103,19 @@ int main()
 			//file.close();
 			break;
 		}
-		case 2: // Before a
-			/*cout << "Last Record:" << endl;
-			readLastRecord(fileName);*/
-			break;
+		//case 2: // View Before And After Progress
+		//	viewProgess(fileName);
+		//	break;
 			
-		case 3: 
-			/*printAllRecords(fileName);*/
+		case 2: // View Data Table
 			viewTable(fileName, person);
 			break;
 			
-		case 4: // Reset
+		case 3: // Reset
 			reset(fileName);
 			break;
-
-		case 5: // Exit
-			// Close the file before exiting
-			//cout << "Is the file open? " << boolalpha << file.is_open(); // was no
-			//file.close();
-			break;
 		}
-	} while (menuChoice != 5);
+	} while (menuChoice != 4);
 
 	return 0;
 }
@@ -135,7 +128,7 @@ User createBaseUser()
 	char measurementType;
 
 
-	cout << "Welcome!  Would you like to use metric or imperial units? (m/i): ";
+	cout << "Nice to meet you! Let's start by getting your height.\nWould you like to use metric or imperial units? (m/i): ";
 	cin >> measurementType;
 
 	// Validate input for measurment type
@@ -162,7 +155,7 @@ User createBaseUser()
 	}
 	else
 	{
-		cout << "Enter your height in feet and inches: ";
+		cout << "Enter your height in feet and then inches: ";
 		cin >> height1 >> height2;
 
 		// Validate input for weight
@@ -174,11 +167,10 @@ User createBaseUser()
 
 		base.setHeight(height1, height2);
 		base.setIsMetric(false);
-
 	}
 
-	// Write name and height to file
-	BaseRecord baseRec = { base.getHeight() };
+	cout << "Thank you for letting me know how tall you are!\nPlease see the menu below.\n";
+
 	return base;
 }
 
@@ -227,83 +219,86 @@ void showCategory(double bmi)
 //	file.close();
 //}
 //
-User::Record readLastRecord(string fileName) {
-	User::Record lastRecord = {};
-	// Open the file in binary mode
-	ifstream file(fileName, ios::binary);
-	if (!file.is_open()) {
-		cerr << "Error: Failed to open the file for reading." << endl;
-		return lastRecord;
-	}
-
-	// Get the size of the file
-	file.seekg(0, ios::end);
-	streampos fileSize = file.tellg();
-	file.seekg(0, ios::beg);
-
-	// Check if the file has at least one record
-	if (fileSize < static_cast<long long>(sizeof(User::Record))) {
-		cerr << "Error: File is empty or does not contain a complete record." << endl;
-		file.close();
-		return lastRecord;
-	}
-
-	// Move the file pointer to the last record
-	file.seekg(-static_cast<long long>(sizeof(User::Record)), ios::end);
-	if (file.fail()) {
-		cerr << "Error: Failed to read the last record." << endl;
-		file.close();
-		return lastRecord;
-	}
-
-	// Read the last record
-	file.read(reinterpret_cast<char*>(&lastRecord), sizeof(User::Record));
-
-	// Close the file
-	file.close();
-
-	// Print the last record
-
-	if (lastRecord.isMetric) {
-		cout << "Height: " << lastRecord.height << " centimeters" << endl;
-	}
-	else {
-		double ht = lastRecord.height;
-		double feet = floor(ht / 12);
-		double inches = fmod(ht, 12);
-		cout << "Height: " << feet << " feet and " << inches << " inches" << endl;
-
-	}
-	cout << "Is metric: " << (lastRecord.isMetric ? "Yes" : "No") << endl;
-	cout << "Weight: " << lastRecord.weight << endl;
-	cout << "BMI: ";
-	printf("%.1f", lastRecord.bmi); // Print to one decimal point
-	cout << endl;
-	
-
-	return lastRecord;
-}
+//User::Record readLastRecord(string fileName) {
+//	User::Record lastRecord = {};
+//	// Open the file in binary mode
+//	ifstream file(fileName, ios::binary);
+//	if (!file.is_open()) {
+//		cerr << "Error: Failed to open the file for reading." << endl;
+//		return lastRecord;
+//	}
+//
+//	// Get the size of the file
+//	file.seekg(0, ios::end);
+//	streampos fileSize = file.tellg();
+//	file.seekg(0, ios::beg);
+//
+//	// Check if the file has at least one record
+//	if (fileSize < static_cast<long long>(sizeof(User::Record))) {
+//		cerr << "Error: File is empty or does not contain a complete record." << endl;
+//		file.close();
+//		return lastRecord;
+//	}
+//
+//	// Move the file pointer to the last record
+//	file.seekg(-static_cast<long long>(sizeof(User::Record)), ios::end);
+//	if (file.fail()) {
+//		cerr << "Error: Failed to read the last record." << endl;
+//		file.close();
+//		return lastRecord;
+//	}
+//
+//	// Read the last record
+//	file.read(reinterpret_cast<char*>(&lastRecord), sizeof(User::Record));
+//
+//	// Close the file
+//	file.close();
+//
+//	// Print the last record
+//
+//	if (lastRecord.isMetric) {
+//		cout << "Height: " << lastRecord.height << " centimeters" << endl;
+//	}
+//	else {
+//		double ht = lastRecord.height;
+//		double feet = floor(ht / 12);
+//		double inches = fmod(ht, 12);
+//		cout << "Height: " << feet << " feet and " << inches << " inches" << endl;
+//
+//	}
+//	cout << "Is metric: " << (lastRecord.isMetric ? "Yes" : "No") << endl;
+//	cout << "Weight: " << lastRecord.weight << endl;
+//	cout << "BMI: ";
+//	printf("%.1f", lastRecord.bmi); // Print to one decimal point
+//	cout << endl;
+//	
+//
+//	return lastRecord;
+//}
 
 int getMenu()
 {
 	int choice; // Holds user's menu choice
 
 	// Display the menu
-	cout << "1. Enter New Weight" << endl
-		<< "2. View Before And After Progress" << endl
-		<< "3. View Data Table" << endl
-		<< "4. Reset Data" << endl
-		<< "5. Exit" << endl;
+	cout << "\n1. Enter New Weight" << endl
+		//<< "2. View Before And After Progress" << endl
+		<< "2. View Data Table" << endl
+		<< "3. Reset Data" << endl
+		<< "4. Exit" << endl
+	<< "Enter your menu choice: ";
 
 	// Get menu choice
 	cin >> choice;
 
 	// Validate user's menu choice
-	while (choice < 1 || choice > 5)
+	while (choice < 1 || choice > 4)
 	{
-		cout << "ERROR: Please enter a number 1-5: ";
+		cout << "ERROR: Please enter a number 1-4: ";
 		cin >> choice;
 	}
+
+	cout << endl;
 
 	return choice;
 }
@@ -384,31 +379,30 @@ void viewTable(string fileName, User user)
 
 		cout << endl;
 
+		//// test
+		//cout << "First Record\n";
+		//file.clear();
+		//file.seekg(0L, ios::beg); // Seek first record
+		//file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
+		//cout << setw(5) << user.record.weight << setw(20) << " ";
+		//printf("%.1f", user.record.bmi); // Print to one decimal point
+		//cout << setw(12) << " ";
+		//showCategory(user.record.bmi);
+		//cout << endl;
 
-		// test
-		cout << "First Record\n";
-		file.clear();
-		file.seekg(0L, ios::beg); // Seek first record
-		file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
-		cout << setw(5) << user.record.weight << setw(20) << " ";
-		printf("%.1f", user.record.bmi); // Print to one decimal point
-		cout << setw(12) << " ";
-		showCategory(user.record.bmi);
-		cout << endl;
+		//
+		//cout << "Last Record\n";
+		//file.clear();
+		//while (!file.eof())
+		//{
+		//	file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
+		//}
 
-		
-		cout << "Last Record\n";
-		file.clear();
-		while (!file.eof())
-		{
-			file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
-		}
-
-		cout << setw(5) << user.record.weight << setw(20) << " ";
-		printf("%.1f", user.record.bmi); // Print to one decimal point
-		cout << setw(12) << " ";
-		showCategory(user.record.bmi);
-		cout << endl;
+		//cout << setw(5) << user.record.weight << setw(20) << " ";
+		//printf("%.1f", user.record.bmi); // Print to one decimal point
+		//cout << setw(12) << " ";
+		//showCategory(user.record.bmi);
+		//cout << endl;
 
 
 		file.close();
@@ -417,5 +411,48 @@ void viewTable(string fileName, User user)
 	{
 		cout << "You need to enter your weight to populate the table.\n";
 	}
+}
 
+User::Record getFirstRecord(string fileName)
+{
+	ifstream file;
+	User::Record firstRec = {};
+
+	file.open(fileName, ios::in | ios::binary);
+
+	file.clear();
+	file.seekg(0L, ios::beg); // Seek first record
+	file.read(reinterpret_cast<char*>(&firstRec), sizeof(firstRec));
+	file.close();
+
+	return firstRec;
+}
+
+User::Record getLastRecord(string fileName)
+{
+	ifstream file;
+	User::Record lastRec = {};
+
+	file.open(fileName, ios::in | ios::binary);
+
+	file.clear();
+	while (!file.eof())
+	{
+		file.read(reinterpret_cast<char*>(&lastRec), sizeof(lastRec));
+	}
+	file.close();
+
+	return lastRec;
+}
+
+void viewProgess(string fileName)
+{
+	if (fileExists(fileName))
+	{
+
+	}
+	else
+	{
+		cout << "You need to enter your weight to see your progress.\n";
+	}
 }
