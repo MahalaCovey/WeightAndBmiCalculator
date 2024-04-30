@@ -21,8 +21,8 @@ public:
 	ImperialData(double, double, double); // Overloaded constructor for height in feet and inches converted to inches
 	void setWeight(double);
 	double getWeight() const;
+	// Overriden virtual functions
+	void addRecord(string); 
 	double getBmi() const;
-	void addRecord(string);
-
 };
 #endif

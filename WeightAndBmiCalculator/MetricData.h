@@ -20,8 +20,8 @@ public:
 	MetricData(double, double, double); // Overloaded constructor for height in feet and inches converted to inches
 	void setWeight(double);
 	double getWeight() const;
-	double getBmi() const;
+	// Overriden virtual functions
 	void addRecord(string);
-
+	double getBmi() const;
 };
 #endif

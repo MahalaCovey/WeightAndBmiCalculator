@@ -6,16 +6,13 @@
 #ifndef USER_H
 #define USER_H
 #include <string>
-
 using namespace std;
 
 class User
 {
 private:
-	/*char name[30];*/
 	double height; // Height in centimeters or feet and inches 
 	bool isMetric; // Measurment preference in metric units or imperial units
-	/*char type[1];*/
 
 public:
 	User(); // Default constructor
@@ -26,16 +23,15 @@ public:
 	void setIsMetric(bool);
 	double getHeight() const;
 	bool getIsMetric() const;
+	double promptUserForWeight(bool);
 	virtual void addRecord(string);
 	virtual double getBmi() const;
-	double promptUserForWeight(bool isMetric);
-	struct Record
+	struct Record // Declaration of structure that is used to read user information to a binary file
 	{
 		double height;
 		bool isMetric;
 		double weight;
 		double bmi;
 	} record;
-
 };
 #endif

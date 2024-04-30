@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <cmath>
 using namespace std;
 
 //***********************
@@ -50,34 +51,24 @@ double ImperialData::getWeight() const
 	return weight;
 }
 
-
-//***********************************************************************************
-// The getBmi member function returns a User's body mass index from imperial units. *
-//***********************************************************************************
-double ImperialData::getBmi() const
+//********************************************************************************************************************************
+// The virtual overriden addRecord member function takes a file name as a parameter and sets the user's weight in imperial units *
+// by calling the promptUserForWeight function. A Record is initialized with all the needed information and written to the file. *
+//********************************************************************************************************************************
+void ImperialData::addRecord(string fileName) 
 {
-	return weight / (pow(getHeight(), 2)) * 703;
-}
-
-void ImperialData::addRecord(string fileName) {
-	{
 		setWeight(promptUserForWeight(false));
 		Record rec = { getHeight(), getIsMetric(), getWeight(), getBmi() };
-
-		//int ht = getHeight();
-		//double feet = ht / 12;
-		//int inches = ht % 12;
-
-		//cout << "impericalRecord" << endl; // display to check vals
-		//cout << "ht= " << feet << " feet and " << inches << " inches" << endl;
-		//cout << "is= " << getIsMetric() << endl;
-		//cout << "wt= " << getWeight() << endl;
-		//cout << "bmi= " << getBmi() << endl;
 
 		ofstream file(fileName, ios::binary | ios::app);
 		file.write(reinterpret_cast<char*>(&rec), sizeof(rec));
 		file.close();
+}
 
-	}
-
+//***************************************************************************************************
+// The virtual overriden getBmi member function returns a User's BMI with regard to imperial units. *
+//***************************************************************************************************
+double ImperialData::getBmi() const
+{
+	return weight / (pow(getHeight(), 2)) * 703;
 }

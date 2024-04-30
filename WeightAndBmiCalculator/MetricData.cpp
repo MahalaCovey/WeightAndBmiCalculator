@@ -8,7 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-
+#include <cmath>
 using namespace std;
 
 //***********************
@@ -51,26 +51,24 @@ double MetricData::getWeight() const
 	return weight;
 }
 
-
-//*********************************************************************************
-// The getBmi member function returns a User's body mass index from metric units. *
-//*********************************************************************************
-double MetricData::getBmi() const
-{
-	return weight / (pow((getHeight() / 100), 2));
-}
+//********************************************************************************************************************************
+// The virtual overriden addRecord member function takes a file name as a parameter and sets the user's weight in metric units   *
+// by calling the promptUserForWeight function. A Record is initialized with all the needed information and written to the file. *
+//********************************************************************************************************************************
 void MetricData::addRecord(string fileName) 
 {
 	setWeight(promptUserForWeight(true));
 	Record rec = { getHeight(), getIsMetric(), getWeight(), getBmi() };
 
-	//cout << "metricRecord" << endl; // display to check vals
-	//cout << "ht= " << getHeight() << endl;
-	//cout << "is= " << getIsMetric() << endl;
-	//cout << "ht= " << getHeight() << endl;
-	//cout << "bmi= " << getBmi() << endl;
-
 	ofstream file(fileName, ios::binary | ios::app);
 	file.write(reinterpret_cast<char*>(&rec), sizeof(rec));
 	file.close();
+}
+
+//*************************************************************************************************
+// The virtual overriden getBmi member function returns a User's BMI with regard to metric units. *
+//*************************************************************************************************
+double MetricData::getBmi() const
+{
+	return weight / (pow((getHeight() / 100), 2));
 }

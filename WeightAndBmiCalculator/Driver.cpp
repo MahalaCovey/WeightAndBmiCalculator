@@ -2,6 +2,22 @@
 // CIS 1202 800
 // May 3, 2024
 
+/* Program Name: Weight And BMI Calculator
+   Program Description: 
+   This program stores a user's height and weight in metric or imperial units in a binary file. Their body mass index (BMI) is calculated and displayed
+   with their height and weight information, as well as BMI category. They can choose to "reset" their binary file, erasing their data, thus allowing for new input. 
+   Program Instructions:
+   1) When the program is first run, a user must indicate whether they would like to use metric or imperial units for their data. They are then prompted for their 
+   height in either centimeters if they chose metric units, or feet and inches (two numbers separated by a return/enter or space) if they chose imperial units.
+   This data is only saved to the binary file once they enter at least one weight value. It is assumed that the user's height and measurement type will not change unless the
+   file is reset. 
+   2) A menu will then be displayed with options to enter weight values, view their data table, reset their file, and exit. The user can enter as many weight values 
+   as they want. After the first weight value is given, they can exit the program and come back to it without needing to enter their old data into the program, as it 
+   will be saved to the binary file.
+   3) With height, measurement type, and at least one weight value give, the user can display their personal data table, which shows the information they entered
+   and indicates their BMI for each weight value and category it falls under, ranging from underweight to obese.
+   4) The user can reset their binary file to start from the beginning, allowing them to use a different measurement type and/or height. */
+
 // Driver for the program.
 #include "User.h"
 #include "MetricData.h"
@@ -9,53 +25,40 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#include <filesystem>
+#include <filesystem> // For filesystem::path and filesystem::exists (C++20 Standard is used for this project)
 #include <cmath>
-
-
 using namespace std;
 
-// File record structure 
-struct BaseRecord
-{
-	double height;
-	bool isMetric;
-	double weight;
-};
-
 // Function prototypes
-User createBaseUser();
-void showCategory(double);
-
-int getMenu();
-//User::Record readLastRecord(string);
-//void printAllRecords(string);
-void reset(string);
 bool fileExists(string);
+User createBaseUser();
+int getMenu();
 void viewTable(string, User);
-void viewProgess(string);
-User::Record getLastRecord(string);
+void reset(string);
+void showCategory(double);
 User::Record getFirstRecord(string);
-
-
+User::Record getLastRecord(string);
 
 int main()
 {
 	int menuChoice; // User's menu choice
-	User person;    // User's base info
+	User person;    // User's base info (height and measurement type)
 	string const fileName = "BmiData.dat";
 
+	// If the file exists, the user already entered their height and measurement type. The getFirstRecord function is called to load the 
+	// user's height and measurement type from the file into the User person object for future BMI calculations.
 	if (fileExists(fileName))
 	{
 		cout << "Welcome back!\n";
-		User::Record base = getLastRecord(fileName);
+		User::Record base = getFirstRecord(fileName);
 		person.setHeight(base.height);
 		person.setIsMetric(base.isMetric);
 	}
+
+	// If the file does not exist, the User person object is initialized through the createBaseUser function, which gets height and
+	// measurement type directly from the user.
 	else 
 	{
-		/*cout << "\nFile doesn't exist." << endl;
-		cout << "Creating file..." << endl;*/
 		person = createBaseUser();
 	}
 
@@ -66,7 +69,7 @@ int main()
 
 		switch (menuChoice)
 		{
-		case 1: // Enter new record
+		case 1: // Enter New Weight
 		{
 			User* userPtr = nullptr;
 
@@ -76,36 +79,11 @@ int main()
 			}
 			else
 			{
-				/*int ht = person.getHeight();
-				double feet =  ht/ 12;
-				int inches = ht % 12;
-				user = new ImperialData(feet, inches, 0);*/
 				userPtr = new ImperialData(0, person.getHeight(), 0);
 			}
-
-			//if (userPtr == nullptr) {
-			//	cerr << "Error: Memory allocation failed." << endl;
-			//	break; // Exit the case if memory allocation failed
-			//}
-
-			//file.open(fileName, ios::out | ios::app | ios::binary);
-			//if (!file.is_open()) {
-			//	cerr << "Error: Failed to open the file for writing." << endl;
-			//	delete userPtr;
-			//	break;
-			//}
-
 			userPtr->addRecord(fileName);
-			/*cout << "metric bmi = " << userPtr->getBmi() << endl;
-			showCategory(userPtr->getBmi());*/
-
-			//delete userPtr; // Clean up dynamically allocated memory
-			//file.close();
 			break;
 		}
-		//case 2: // View Before And After Progress
-		//	viewProgess(fileName);
-		//	break;
 			
 		case 2: // View Data Table
 			viewTable(fileName, person);
@@ -115,11 +93,29 @@ int main()
 			reset(fileName);
 			break;
 		}
+
 	} while (menuChoice != 4);
 
 	return 0;
 }
 
+//*************************************************************************************************************************************************
+// The fileExists function takes a file name as a parameter and returns true if it exists within the program's directory or false if it does not. *
+//*************************************************************************************************************************************************
+bool fileExists(string fileName)
+{
+	filesystem::path filePath{ fileName };
+
+	if (filesystem::exists(filePath))
+		return true;
+	else
+		return false;
+}
+
+//***********************************************************************************************************************
+// The createBaseUser function prompts the user for their measurement type, metric or imperial units, and their height. *
+// After their input is validated, the User object is returned.															*
+//***********************************************************************************************************************
 User createBaseUser()
 {
 	User base;
@@ -169,124 +165,24 @@ User createBaseUser()
 		base.setIsMetric(false);
 	}
 
-	cout << "Thank you for letting me know how tall you are!\nPlease see the menu below.\n";
+	cout << "Thank you for letting me know how tall you are!\nPlease see the menu below and enter at least one weight value to save your data.\n";
 
 	return base;
 }
 
-
-void showCategory(double bmi)
-{
-	if (bmi < 18.5)
-	{
-		cout << "Underweight";
-	}
-	else if (bmi >= 18.5 && bmi < 24.9)
-	{
-		cout << "Normal Weight";
-	}
-	else if (bmi >= 24.9 && bmi < 30)
-	{
-		cout << "Overweight";
-	}
-	else
-	{
-		cout << "Obese";
-	}
-}
-
-//void printAllRecords(string f) {
-//	// Open the file in binary mode
-//	ifstream file(f, ios::binary);
-//	if (!file.is_open()) {
-//		cerr << "Error: Failed to open the file for reading." << endl;
-//		return;
-//	}
-//
-//	// Read and print each record in the file
-//	User::Record record;
-//	cout << "Height" << endl;
-//	while (file.read(reinterpret_cast<char*>(&record), sizeof(User::Record))) {
-////		cout << "Name: " << record.name << endl;
-//		cout << "Height: " << record.height << endl;
-//		cout << "Is metric: " << (record.isMetric ? "Yes" : "No") << endl;
-//		cout << "Weight: " << record.weight << endl;
-//		cout << "BMI: " << record.bmi << endl;
-//		cout << endl;
-//	}
-//
-//	// Close the file
-//	file.close();
-//}
-//
-//User::Record readLastRecord(string fileName) {
-//	User::Record lastRecord = {};
-//	// Open the file in binary mode
-//	ifstream file(fileName, ios::binary);
-//	if (!file.is_open()) {
-//		cerr << "Error: Failed to open the file for reading." << endl;
-//		return lastRecord;
-//	}
-//
-//	// Get the size of the file
-//	file.seekg(0, ios::end);
-//	streampos fileSize = file.tellg();
-//	file.seekg(0, ios::beg);
-//
-//	// Check if the file has at least one record
-//	if (fileSize < static_cast<long long>(sizeof(User::Record))) {
-//		cerr << "Error: File is empty or does not contain a complete record." << endl;
-//		file.close();
-//		return lastRecord;
-//	}
-//
-//	// Move the file pointer to the last record
-//	file.seekg(-static_cast<long long>(sizeof(User::Record)), ios::end);
-//	if (file.fail()) {
-//		cerr << "Error: Failed to read the last record." << endl;
-//		file.close();
-//		return lastRecord;
-//	}
-//
-//	// Read the last record
-//	file.read(reinterpret_cast<char*>(&lastRecord), sizeof(User::Record));
-//
-//	// Close the file
-//	file.close();
-//
-//	// Print the last record
-//
-//	if (lastRecord.isMetric) {
-//		cout << "Height: " << lastRecord.height << " centimeters" << endl;
-//	}
-//	else {
-//		double ht = lastRecord.height;
-//		double feet = floor(ht / 12);
-//		double inches = fmod(ht, 12);
-//		cout << "Height: " << feet << " feet and " << inches << " inches" << endl;
-//
-//	}
-//	cout << "Is metric: " << (lastRecord.isMetric ? "Yes" : "No") << endl;
-//	cout << "Weight: " << lastRecord.weight << endl;
-//	cout << "BMI: ";
-//	printf("%.1f", lastRecord.bmi); // Print to one decimal point
-//	cout << endl;
-//	
-//
-//	return lastRecord;
-//}
-
+//***********************************************************************************************************************************
+// The getMenu function displays a menu of choices, prompts and validates the user for a menu choice, and returns that menu choice. *
+//***********************************************************************************************************************************
 int getMenu()
 {
 	int choice; // Holds user's menu choice
 
 	// Display the menu
-	cout << "\n1. Enter New Weight" << endl
-		//<< "2. View Before And After Progress" << endl
-		<< "2. View Data Table" << endl
-		<< "3. Reset Data" << endl
-		<< "4. Exit" << endl
-	<< "Enter your menu choice: ";
+	cout << "\n1. Enter New Weight\n"
+		<< "2. View Data Table\n"
+		<< "3. Reset Data\n"
+		<< "4. Exit\n"
+		<< "Enter your menu choice: ";
 
 	// Get menu choice
 	cin >> choice;
@@ -303,50 +199,11 @@ int getMenu()
 	return choice;
 }
 
-void reset(string fileName)
-{
-	char check;
-	filesystem::path filePath{ fileName };
-
-	cout << "Are you sure you want to reset? This will permanently delete all your data. (y/n): ";
-	cin >> check;
-
-	// Validate input for check
-	while (tolower(check) != 'y' && tolower(check) != 'n')
-	{
-		cout << "ERROR: Please enter 'y' to reset or 'n' to keep your data: ";
-		cin >> check;
-	}
-
-	if (tolower(check) == 'y') // Reset
-	{
-		if (filesystem::remove(fileName))
-		{
-			cout << "Your data was successfully deleted. After the program exits, enter brand new data by running it again!\n";
-			exit(0);
-		}
-		else
-		{
-			cout << "There was an error deleting your data\n";
-		}
-	}
-	else // Don't reset
-	{
-		cout << "Keeping your data for now...\n";
-	}
-
-}
-
-bool fileExists(string fileName)
-{
-	filesystem::path filePath{ fileName };
-
-	if (filesystem::exists(filePath))
-		return true;
-	else
-		return false;
-}
-
+//************************************************************************************************************************
+// The viewTable function takes a file name and User object as parameters. If the file exists, it is read to display the *
+// records containing the user's height, weight and BMI. The results are formatted in an attractive table.				 *
+// If the file does not exist, the user is informed that they must first enter their weight to see the table.		     *
+//************************************************************************************************************************
 void viewTable(string fileName, User user)
 {
 	ifstream file;
@@ -379,32 +236,6 @@ void viewTable(string fileName, User user)
 
 		cout << endl;
 
-		//// test
-		//cout << "First Record\n";
-		//file.clear();
-		//file.seekg(0L, ios::beg); // Seek first record
-		//file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
-		//cout << setw(5) << user.record.weight << setw(20) << " ";
-		//printf("%.1f", user.record.bmi); // Print to one decimal point
-		//cout << setw(12) << " ";
-		//showCategory(user.record.bmi);
-		//cout << endl;
-
-		//
-		//cout << "Last Record\n";
-		//file.clear();
-		//while (!file.eof())
-		//{
-		//	file.read(reinterpret_cast<char*>(&user.record), sizeof(user.record));
-		//}
-
-		//cout << setw(5) << user.record.weight << setw(20) << " ";
-		//printf("%.1f", user.record.bmi); // Print to one decimal point
-		//cout << setw(12) << " ";
-		//showCategory(user.record.bmi);
-		//cout << endl;
-
-
 		file.close();
 	}
 	else
@@ -413,6 +244,72 @@ void viewTable(string fileName, User user)
 	}
 }
 
+//***************************************************************************************************************************
+// The reset function takes a file name as a parameter. After ensuring the user wants to reset their data, the file name is *
+// used to delete the file. The program then exits so the user can enter new data upon running the program again.			*
+//***************************************************************************************************************************
+void reset(string fileName)
+{
+	char check; // Holds user's decision to reset
+	filesystem::path filePath{ fileName };
+
+	cout << "Are you sure you want to reset? This will permanently delete all your data. (y/n): ";
+	cin >> check;
+
+	// Validate input for check
+	while (tolower(check) != 'y' && tolower(check) != 'n')
+	{
+		cout << "ERROR: Please enter 'y' to reset or 'n' to keep your data: ";
+		cin >> check;
+	}
+
+	if (tolower(check) == 'y') // Reset
+	{
+		if (filesystem::remove(fileName))
+		{
+			cout << "Your data was successfully deleted. After the program exits, enter brand new data by running it again!\n";
+			exit(0);
+		}
+		else
+		{
+			cout << "There was an error deleting your data\n";
+		}
+	}
+	else // Don't reset
+	{
+		cout << "Keeping your data for now...\n";
+	}
+
+}
+
+//***********************************************************************************************************************
+// The showCategory function takes a BMI value as a parameter. The BMI is compared to its appropriate category, ranging *
+// from underweight to obese, and printed out.																			*
+//***********************************************************************************************************************
+void showCategory(double bmi)
+{
+	if (bmi < 18.5)
+	{
+		cout << "Underweight";
+	}
+	else if (bmi >= 18.5 && bmi < 24.9)
+	{
+		cout << "Normal Weight";
+	}
+	else if (bmi >= 24.9 && bmi < 30)
+	{
+		cout << "Overweight";
+	}
+	else
+	{
+		cout << "Obese";
+	}
+}
+
+//**************************************************************************************************************************
+// The getFirstRecord function takes a file name as a parameter. The file is read to retrieve the first record in the file *
+// and returned as a User Record object.																				   *
+//**************************************************************************************************************************
 User::Record getFirstRecord(string fileName)
 {
 	ifstream file;
@@ -428,6 +325,10 @@ User::Record getFirstRecord(string fileName)
 	return firstRec;
 }
 
+//*************************************************************************************************************************
+// The getFirstRecord function takes a file name as a parameter. The file is read to retrieve the last record in the file *
+// and returned as a User Record object.																				  *
+//*************************************************************************************************************************
 User::Record getLastRecord(string fileName)
 {
 	ifstream file;
@@ -436,23 +337,11 @@ User::Record getLastRecord(string fileName)
 	file.open(fileName, ios::in | ios::binary);
 
 	file.clear();
-	while (!file.eof())
+	while (!file.eof()) 
 	{
-		file.read(reinterpret_cast<char*>(&lastRec), sizeof(lastRec));
+		file.read(reinterpret_cast<char*>(&lastRec), sizeof(lastRec)); // Reads last record after loop is at the end of the file
 	}
 	file.close();
 
 	return lastRec;
-}
-
-void viewProgess(string fileName)
-{
-	if (fileExists(fileName))
-	{
-
-	}
-	else
-	{
-		cout << "You need to enter your weight to see your progress.\n";
-	}
 }
