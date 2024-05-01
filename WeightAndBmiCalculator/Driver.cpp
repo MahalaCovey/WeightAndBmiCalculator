@@ -37,7 +37,6 @@ void viewTable(string, User);
 void reset(string);
 void showCategory(double);
 User::Record getFirstRecord(string);
-User::Record getLastRecord(string);
 
 int main()
 {
@@ -329,25 +328,4 @@ User::Record getFirstRecord(string fileName)
 	file.close();
 
 	return firstRec;
-}
-
-//*************************************************************************************************************************
-// The getFirstRecord function takes a file name as a parameter. The file is read to retrieve the last record in the file *
-// and returned as a User Record object.																				  *
-//*************************************************************************************************************************
-User::Record getLastRecord(string fileName)
-{
-	ifstream file;
-	User::Record lastRec = {};
-
-	file.open(fileName, ios::in | ios::binary);
-
-	file.clear();
-	while (!file.eof()) 
-	{
-		file.read(reinterpret_cast<char*>(&lastRec), sizeof(lastRec)); // Reads last record after loop is at the end of the file
-	}
-	file.close();
-
-	return lastRec;
 }
