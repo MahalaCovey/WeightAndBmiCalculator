@@ -240,7 +240,7 @@ void viewTable(string fileName, User user)
 	}
 	else
 	{
-		cout << "You need to enter your weight to populate the table.\n";
+		cout << "ERROR: You need to enter your weight to populate the table.\n";
 	}
 }
 
