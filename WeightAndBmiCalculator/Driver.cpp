@@ -244,42 +244,48 @@ void viewTable(string fileName, User user)
 	}
 }
 
-//***************************************************************************************************************************
-// The reset function takes a file name as a parameter. After ensuring the user wants to reset their data, the file name is *
-// used to delete the file. The program then exits so the user can enter new data upon running the program again.			*
-//***************************************************************************************************************************
+//***********************************************************************************************************************************************
+// The reset function takes a file name as a parameter. After ensuring the file exists and the user wants to reset their data, the file name is *
+// used to delete the file. The program then exits so the user can enter new data upon running the program again.								*
+//***********************************************************************************************************************************************
 void reset(string fileName)
 {
 	char check; // Holds user's decision to reset
 	filesystem::path filePath{ fileName };
 
-	cout << "Are you sure you want to reset? This will permanently delete all your data. (y/n): ";
-	cin >> check;
-
-	// Validate input for check
-	while (tolower(check) != 'y' && tolower(check) != 'n')
+	if (fileExists(fileName))
 	{
-		cout << "ERROR: Please enter 'y' to reset or 'n' to keep your data: ";
+		cout << "Are you sure you want to reset? This will permanently delete all your data. (y/n): ";
 		cin >> check;
-	}
 
-	if (tolower(check) == 'y') // Reset
-	{
-		if (filesystem::remove(fileName))
+		// Validate input for check
+		while (tolower(check) != 'y' && tolower(check) != 'n')
 		{
-			cout << "Your data was successfully deleted. After the program exits, enter brand new data by running it again!\n";
-			exit(0);
+			cout << "ERROR: Please enter 'y' to reset or 'n' to keep your data: ";
+			cin >> check;
 		}
-		else
-		{
-			cout << "There was an error deleting your data\n";
-		}
-	}
-	else // Don't reset
-	{
-		cout << "Keeping your data for now...\n";
-	}
 
+		if (tolower(check) == 'y') // Reset
+		{
+			if (filesystem::remove(fileName))
+			{
+				cout << "Your data was successfully deleted. After the program exits, enter brand new data by running it again!\n";
+				exit(0);
+			}
+			else
+			{
+				cout << "ERROR: There was an issue deleting your data.\n";
+			}
+		}
+		else // Don't reset
+		{
+			cout << "Keeping your data for now...\n";
+		}
+	}
+	else
+	{
+		cout << "ERROR: You cannot reset your data because your data has not been saved. To save your data, enter your weight.\n";
+	}
 }
 
 //***********************************************************************************************************************
